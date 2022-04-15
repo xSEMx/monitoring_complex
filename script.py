@@ -7,6 +7,12 @@ from datetime import date
 CREDENTIALS_FILE = 'akes-project-4037cc052234.json'
 spreadsheetId = '1TkBDXHKLVHVmuilU2Iuak34kmjuQPKX40LhbReXc4DE'
 sheetId = 1968705244
+
+
+#project = Script("12333.log", CREDENTIALS_FILE, spreadsheetId, sheetId)
+#project.main___()
+
+
 class Script:
     def __init__(self, file, CREDENTIALS_FILE, spreadsheetId, sheetId):
         self.file = file
@@ -16,7 +22,15 @@ class Script:
         credentials = ServiceAccountCredentials.from_json_keyfile_name(self.CREDENTIALS_FILE, ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'])
         httpAuth = credentials.authorize(httplib2.Http())
         self.service = apiclient.discovery.build('sheets', 'v4', http = httpAuth)
-        self.len = len(self.withFile())+4   # Len for a butchUpdate
+        self.len = len(self.withFile())+4   # Len for a butchUpdate    #self.len = len(self.in_file)+4
+
+        
+        #If lists in_file and func_cells need later
+        
+       #self.in_file = self.withFile()
+       #self.len = len(self.in_file)+4
+       #self.func_cells = self.cells_with_func()
+
         
     def withFile(self):
         in_file = [] 
@@ -44,7 +58,7 @@ class Script:
 
     
     def copy(self):
-        request = self.service.spreadsheets().sheets().copyTo(spreadsheetId=self.spreadsheetId, sheetId = self.sheetId, body =
+        request = self.service.spreadsheets().sheets().copyTo(spreadsheetId = self.spreadsheetId, sheetId = self.sheetId, body =
         {
             'destination_spreadsheet_id': self.spreadsheetId
         }
@@ -75,11 +89,11 @@ class Script:
         "data": [
             {"range": f"{newName}!A5:AJ{self.len}",
              "majorDimension": "ROWS",
-             "values": self.withFile()},
-            
+             "values": self.withFile()},       #self.in_file
+                        
             {"range": f"{newName}!AK5:AN{self.len}",
              "majorDimension": "COLUMNS",
-             "values": self.cells_with_func()}
+             "values": self.cells_with_func()}   #self.func_cells
             ]
         }).execute()
         
