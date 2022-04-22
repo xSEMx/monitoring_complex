@@ -1,35 +1,28 @@
-#
 import httplib2
 import apiclient.discovery
 from oauth2client.service_account import ServiceAccountCredentials
 import csv
-from datetime import date
+from datetime import datetime
 CREDENTIALS_FILE = 'akes-project-4037cc052234.json'
 spreadsheetId = '1TkBDXHKLVHVmuilU2Iuak34kmjuQPKX40LhbReXc4DE'
 sheetId = 1968705244
 
-
-#project = Script("12333.log", CREDENTIALS_FILE, spreadsheetId, sheetId)
-#project.main___()
-
-
 class Script:
     def __init__(self, file, CREDENTIALS_FILE, spreadsheetId, sheetId):
         self.file = file
-        self.CREDENTIALS_FILE = CREDENTIALS_FILE
         self.spreadsheetId = spreadsheetId
         self.sheetId = sheetId
-        credentials = ServiceAccountCredentials.from_json_keyfile_name(self.CREDENTIALS_FILE, ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'])
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE, ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'])
         httpAuth = credentials.authorize(httplib2.Http())
         self.service = apiclient.discovery.build('sheets', 'v4', http = httpAuth)
-        self.len = len(self.withFile())+4   # Len for a butchUpdate    #self.len = len(self.in_file)+4
+        self.len = len(self.withFile())  # Len for a butchUpdate
 
+        newName = str(datetime.now())
+        newName = newName[:-10]
+        newName = newName.replace("-", "/")
+        newName = newName.replace(" ", " - ")
         
-        #If lists in_file and func_cells need later
-        
-       #self.in_file = self.withFile()
-       #self.len = len(self.in_file)+4
-       #self.func_cells = self.cells_with_func()
+        self.newName = newName
 
         
     def withFile(self):
@@ -40,6 +33,7 @@ class Script:
                 in_file.append(row)
                 in_file[-1].pop(-1)
         return in_file
+    
     
     def cells_with_func(self):
         func_cells = []
@@ -68,13 +62,12 @@ class Script:
 
     
     def new_name(self):
-        newName = f'{date.today()}'
         response = self.service.spreadsheets().batchUpdate(spreadsheetId = self.spreadsheetId, body = {
             "requests" : [{
                 "updateSheetProperties": {
                     "properties": {
                         "sheetId" : self.copy(),
-                        "title" : newName
+                        "title" : self.newName
                         },
                     "fields": "title"
                     }}]
@@ -83,17 +76,16 @@ class Script:
 
     def main___(self):
         self.new_name()
-        newName = f'{date.today()}'
         results = self.service.spreadsheets().values().batchUpdate(spreadsheetId = self.spreadsheetId, body = {
         "valueInputOption": "USER_ENTERED",
         "data": [
-            {"range": f"{newName}!A5:AJ{self.len}",
+            {"range": f"{self.newName}!A5:AJ{self.len+4}",
              "majorDimension": "ROWS",
-             "values": self.withFile()},       #self.in_file
+             "values": self.withFile()},      
                         
-            {"range": f"{newName}!AK5:AN{self.len}",
+            {"range": f"{self.newName}!AK5:AN{self.len+4}",
              "majorDimension": "COLUMNS",
-             "values": self.cells_with_func()}   #self.func_cells
+             "values": self.cells_with_func()}   
             ]
         }).execute()
         
